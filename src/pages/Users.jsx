@@ -2,15 +2,23 @@ import { useContext, useEffect } from 'react';
 import { FaCode, FaStore, FaUserFriends, FaUsers } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
 import Spinner from '../components/layout/Spinner';
+import { getUserAndRepos } from '../context/github/GithubActions';
 import GithubContext from '../context/github/GithubContext';
+import RepoList from './../components/repos/RepoList';
 
 const Users = () => {
-  const { getUser, user, loading, repos } = useContext(GithubContext);
+  const { user, loading, repos, dispatch } = useContext(GithubContext);
   const { login: loginUrl } = useParams();
 
   useEffect(() => {
-    getUser(loginUrl);
-  }, [getUser, loginUrl]);
+    dispatch({ type: 'SET_LOADING' });
+    const getUserData = async () => {
+      const userData = await getUserAndRepos(loginUrl);
+      dispatch({ type: 'GET_USER_AND_REPOS', payload: userData });
+    };
+
+    getUserData();
+  }, [dispatch, loginUrl]);
 
   const {
     name,
@@ -132,7 +140,7 @@ const Users = () => {
             <div className='stat-value pr-5 text-3xl md:text-4xl'>{public_gists}</div>
           </div>
         </div>{' '}
-        {/* <RepoList repos={repos} /> */}
+        <RepoList repos={repos} />
       </div>
     </>
   );
